@@ -5,8 +5,8 @@ import time
 import eventlet
 eventlet.monkey_patch()
 
-URL_JOKE = "http://localhost:5002/joke"
-URL_COMM = "http://localhost:5002/robot/getcommand"
+URL_JOKE = "http://http://138.197.73.249:80/joke"
+URL_COMM = "http://http://138.197.73.249:80/robot/getcommand"
 port = '/dev/ttyACM0'
 ard = Serial(port,9600,timeout=5)
 
@@ -38,3 +38,4 @@ while(1):
 					relay_command(data['Direction'])
 	except:
 		print("no new command")
+	time.sleep(1)
