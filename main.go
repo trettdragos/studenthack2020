@@ -31,28 +31,17 @@ var jokes chan joke
 // }
 
 func updateJokes(surplus int) {
-	fmt.Println("sunt aci baaah baaah")
-	session, err := geddit.NewLoginSession(
-		"quarantine_joke_bot",
-		"Boredathome69",
-		"gedditAgent v1",
-	)
-	if err != nil {
-		fmt.Println("nu mere contu baaah")
-	}
+	session := geddit.NewSession("joke_bot")
 	subOpts := geddit.ListingOptions{
-		Limit: surplus,
+		Limit: 10,
 	}
-	submissions, err := session.SubredditSubmissions("jokes", geddit.HotSubmissions, subOpts)
-	if err != nil {
-		fmt.Println("nu mer glumele baaah")
-	}
+	submissions, _ := session.SubredditSubmissions("jokes", geddit.HotSubmissions, subOpts)
+
 	for i := 0; i < surplus; i++ {
 		latest := joke{Title: submissions[i].Title, Description: submissions[i].Selftext}
 		jokes <- latest
 		fmt.Println(latest.Title)
 	}
-	session.Clear()
 }
 
 func getJoke(w http.ResponseWriter, r *http.Request) {
