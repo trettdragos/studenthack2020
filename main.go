@@ -5,12 +5,12 @@ import (
 	// "os"
 	// "regexp"
 	// htgotts "github.com/hegedustibor/htgo-tts"
-	"time"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/jzelinskie/geddit"
@@ -100,13 +100,12 @@ func main() {
 	router.HandleFunc("/app/putcommand", createCommand)
 	router.HandleFunc("/robot/getcommand", getCommand)
 	srv := &http.Server{
-        	Handler:      router,
-        	Addr:         "127.0.0.1:8080",
-        	// Good practice: enforce timeouts for servers you create!
-        	WriteTimeout: 2000 * time.Millisecond,
-        	ReadTimeout:  15 * time.Second,
-    	}
+		Handler:      router,
+		Addr:         "127.0.0.1:5002",
+		WriteTimeout: 2000 * time.Millisecond,
+		ReadTimeout:  15 * time.Second,
+	}
 
-    	log.Fatal(srv.ListenAndServe())
+	log.Fatal(srv.ListenAndServe())
 
 }
