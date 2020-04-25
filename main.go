@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"regexp"
 
 	"github.com/gorilla/mux"
 	"github.com/jzelinskie/geddit"
@@ -41,7 +42,10 @@ type command struct {
 
 func updateJokes(surplus int, sorting geddit.PopularitySort) {
 	session := geddit.NewSession("joke_bot")
-
+	reg, err := regexp.Compile("[^a-zA-Z0-9 '.,]+")
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Println("got session")
 	subOpts := geddit.ListingOptions{
 		Limit: surplus + len(jokes) + 3,
@@ -50,7 +54,7 @@ func updateJokes(surplus int, sorting geddit.PopularitySort) {
 	fmt.Println("got submissions")
 
 	for _, sub := range submissions[1:] {
-		latest := joke{Title: sub.Title, Description: sub.Selftext}
+		latest := joke{Title: reg.ReplaceAllString(sub.Title, ""), Description: reg.ReplaceAllString(sub.Selftext, "")}
 		jokes <- latest
 		// fmt.Println(latest.Title)
 	}
@@ -63,6 +67,9 @@ func getJoke(w http.ResponseWriter, r *http.Request) {
 	data := <-jokes
 	fmt.Println(data.Title)
 	json.NewEncoder(w).Encode(data)
+	if len(jokes) <= 1 {
+		updateJokes(10, geddit.NewSubmissions)
+	}
 }
 
 func topUpJokes(w http.ResponseWriter, r *http.Request) {
@@ -99,6 +106,6 @@ func main() {
 	router.HandleFunc("/app/putcommand", createCommand)
 	router.HandleFunc("/robot/getcommand", getCommand)
 
-	log.Fatal(http.ListenAndServe("0.0.0.0:5001", router))
+	log.Fatal(http.ListenAndServe("0.0.0.0:5002", router))
 
 }
