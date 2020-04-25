@@ -1,6 +1,6 @@
 import os
 import requests
-URL = "http://localhost:5001/joke"
+URL = "http://localhost:5002/joke"
 PARAMS = {}
 r = requests.get(url=URL)
 data = r.json()
