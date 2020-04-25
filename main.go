@@ -99,6 +99,6 @@ func main() {
 	router.HandleFunc("/app/putcommand", createCommand)
 	router.HandleFunc("/robot/getcommand", getCommand)
 
-	log.Fatal(http.ListenAndServe(":22", router))
+	log.Fatal(http.ListenAndServe("0.0.0.0:5001", router))
 
 }
