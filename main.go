@@ -10,7 +10,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/jzelinskie/geddit"
@@ -99,13 +98,7 @@ func main() {
 	router.HandleFunc("/topup", topUpJokes)
 	router.HandleFunc("/app/putcommand", createCommand)
 	router.HandleFunc("/robot/getcommand", getCommand)
-	srv := &http.Server{
-		Handler:      router,
-		Addr:         "127.0.0.1:5002",
-		WriteTimeout: 2000 * time.Millisecond,
-		ReadTimeout:  15 * time.Second,
-	}
 
-	log.Fatal(srv.ListenAndServe())
+	log.Fatal(http.ListenAndServe(":22", router))
 
 }
