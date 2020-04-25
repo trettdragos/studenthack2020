@@ -24,8 +24,8 @@ type joke struct {
 }
 
 type command struct {
-	Type      string `json:"Title"`
-	Direction string `json:"Description"`
+	Type      string `json:"Type"`
+	Direction string `json:"Direction"`
 }
 
 // func toSpeech(s geddit.Submission) {
@@ -39,19 +39,22 @@ type command struct {
 // 	// os.Rename(src, filename)
 // }
 
-func updateJokes(surplus int) {
+func updateJokes(surplus int, sorting geddit.PopularitySort) {
 	session := geddit.NewSession("joke_bot")
+
 	fmt.Println("got session")
 	subOpts := geddit.ListingOptions{
-		Limit: surplus + len(jokes),
+		Limit: surplus + len(jokes) + 3,
 	}
-	submissions, _ := session.SubredditSubmissions("jokes", geddit.HotSubmissions, subOpts)
+	submissions, _ := session.SubredditSubmissions("jokes", sorting, subOpts)
 	fmt.Println("got submissions")
-	for i := len(jokes); i < surplus+len(jokes); i++ {
-		latest := joke{Title: submissions[i].Title, Description: submissions[i].Selftext}
+
+	for _, sub := range submissions[1:] {
+		latest := joke{Title: sub.Title, Description: sub.Selftext}
 		jokes <- latest
-		fmt.Println(latest.Title)
+		// fmt.Println(latest.Title)
 	}
+
 	fmt.Println("put submissions")
 }
 
@@ -63,7 +66,7 @@ func getJoke(w http.ResponseWriter, r *http.Request) {
 }
 
 func topUpJokes(w http.ResponseWriter, r *http.Request) {
-	updateJokes(10)
+	updateJokes(10, geddit.NewSubmissions)
 }
 
 func createCommand(w http.ResponseWriter, r *http.Request) {
@@ -73,10 +76,11 @@ func createCommand(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("error making command invalid data: ", w)
 	}
 	json.Unmarshal(body, &newCommand)
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(newCommand)
 	commands <- newCommand
 	fmt.Println("app gave a new command")
-	// w.WriteHeader(http.StatusCreated)
-	// json.NewEncoder(w).Encode(newCommand)
+
 }
 
 func getCommand(w http.ResponseWriter, r *http.Request) {
@@ -86,14 +90,14 @@ func getCommand(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	jokes = make(chan joke, 100)
+	jokes = make(chan joke, 500)
 	commands = make(chan command, 100)
-	updateJokes(10)
+	updateJokes(150, geddit.HotSubmissions)
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/joke", getJoke)
 	router.HandleFunc("/topup", topUpJokes)
 	router.HandleFunc("/app/putcommand", createCommand)
 	router.HandleFunc("/robot/getcommand", getCommand)
-	log.Fatal(http.ListenAndServe(":5000", router))
+	log.Fatal(http.ListenAndServe(":5001", router))
 
 }
