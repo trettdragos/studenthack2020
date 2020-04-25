@@ -1,16 +1,15 @@
 package main
 
 import (
-	// "fmt"
-	// "os"
-	// "regexp"
-	// htgotts "github.com/hegedustibor/htgo-tts"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"regexp"
+	"sync"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/jzelinskie/geddit"
@@ -18,6 +17,18 @@ import (
 
 var jokes chan joke
 var commands chan command
+var counter safeInt
+
+const (
+	boredom     = 15
+	maxCommands = 100
+	maxJokes    = 500
+)
+
+type safeInt struct {
+	value int
+	mux   sync.Mutex
+}
 
 type joke struct {
 	Title       string `json:"Title"`
@@ -28,17 +39,6 @@ type command struct {
 	Type      string `json:"Type"`
 	Direction string `json:"Direction"`
 }
-
-// func toSpeech(s geddit.Submission) {
-// 	reg, _ := regexp.Compile("[^a-zA-Z0-9'.]+")
-// 	speech := htgotts.Speech{Folder: "lines", Language: "en"}
-// 	line := reg.ReplaceAllString(s.Title+ s.Selftext," ")
-// 	fmt.Println(" got post ->", line)
-// 	speech.Speak(line[:200])
-// 	// filename := "lines/joke.mp3"
-// 	// src := "lines/" + s.Title + s.Selftext
-// 	// os.Rename(src, filename)
-// }
 
 func updateJokes(surplus int, sorting geddit.PopularitySort) {
 	session := geddit.NewSession("joke_bot")
@@ -62,6 +62,25 @@ func updateJokes(surplus int, sorting geddit.PopularitySort) {
 	fmt.Println("put submissions")
 }
 
+func getAStrangeThought() geddit.Submission {
+	session := geddit.NewSession("joke_bot")
+	reg, err := regexp.Compile("[^a-zA-Z0-9 '.,]+")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("got strange session")
+	subOpts := geddit.ListingOptions{
+		Limit: 100,
+	}
+	submissions, _ := session.SubredditSubmissions("showerthoughts", geddit.HotSubmissions, subOpts)
+	submission := submissions[rand.Intn(100)]
+	submission.Title = reg.ReplaceAllString(submission.Title, "")
+	submission.Selftext = reg.ReplaceAllString(submission.Selftext, "")
+	fmt.Println("got submission session")
+	return *submission
+
+}
+
 func getJoke(w http.ResponseWriter, r *http.Request) {
 
 	data := <-jokes
@@ -77,6 +96,7 @@ func topUpJokes(w http.ResponseWriter, r *http.Request) {
 }
 
 func createCommand(w http.ResponseWriter, r *http.Request) {
+
 	var newCommand command
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -87,18 +107,51 @@ func createCommand(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(newCommand)
 	commands <- newCommand
 	fmt.Println("app gave a new command")
+	resetBoredomTimer()
 
 }
 
 func getCommand(w http.ResponseWriter, r *http.Request) {
+
 	data := <-commands
 	json.NewEncoder(w).Encode(data)
 	fmt.Println("command sent to robot")
 }
 
+func BoredomTimer() {
+	counter.mux.Lock()
+	counter.value--
+	if counter.value <= 0 {
+		fmt.Println("I got bored so i thought of something")
+		counter.value = boredom
+		if len(commands) < maxCommands {
+			thought := getAStrangeThought()
+			var borredCommand command
+			borredCommand.Type = "strange"
+			borredCommand.Direction = thought.Selftext
+			commands <- borredCommand
+		} else {
+			fmt.Println("But I didn't put it in")
+		}
+	}
+	counter.mux.Unlock()
+	time.Sleep(1 * time.Second)
+	BoredomTimer()
+}
+
+func resetBoredomTimer() {
+	counter.mux.Lock()
+	counter.value = boredom
+	counter.mux.Unlock()
+}
+
 func main() {
-	jokes = make(chan joke, 500)
-	commands = make(chan command, 100)
+	counter.mux.Lock()
+	counter.value = boredom
+	counter.mux.Unlock()
+	go BoredomTimer()
+	jokes = make(chan joke, maxJokes)
+	commands = make(chan command, maxCommands)
 	updateJokes(150, geddit.HotSubmissions)
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/joke", getJoke)
