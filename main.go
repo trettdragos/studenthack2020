@@ -7,8 +7,10 @@ import (
 	// htgotts "github.com/hegedustibor/htgo-tts"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/jzelinskie/geddit"
 )
 
@@ -32,11 +34,12 @@ var jokes chan joke
 
 func updateJokes(surplus int) {
 	session := geddit.NewSession("joke_bot")
+	fmt.Println("got session")
 	subOpts := geddit.ListingOptions{
 		Limit: 10,
 	}
 	submissions, _ := session.SubredditSubmissions("jokes", geddit.HotSubmissions, subOpts)
-
+	fmt.Println("got submissions")
 	for i := 0; i < surplus; i++ {
 		latest := joke{Title: submissions[i].Title, Description: submissions[i].Selftext}
 		jokes <- latest
@@ -53,8 +56,8 @@ func getJoke(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	updateJokes(1)
-	// router := mux.NewRouter().StrictSlash(true)
-	// router.HandleFunc("/", getJoke)
-	// log.Fatal(http.ListenAndServe(":8080", router))
+	router := mux.NewRouter().StrictSlash(true)
+	router.HandleFunc("/", getJoke)
+	log.Fatal(http.ListenAndServe(":8080", router))
 
 }
