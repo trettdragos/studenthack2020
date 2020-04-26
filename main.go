@@ -116,9 +116,8 @@ func getCommand(w http.ResponseWriter, r *http.Request) {
 	var data command
 	if len(commands) > 0 {
 		data = <-commands
-		fmt.Println("command sent to robot")
+		// fmt.Println("command sent to robot")
 	} else {
-
 		data.Type = "null"
 		data.Direction = "null"
 	}
