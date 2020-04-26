@@ -83,13 +83,13 @@ func getAStrangeThought() geddit.Submission {
 }
 
 func getJoke(w http.ResponseWriter, r *http.Request) {
-
+	if len(jokes) == 0 {
+		updateJokes(10, geddit.NewSubmissions)
+	}
 	data := <-jokes
 	fmt.Println(data.Title)
 	json.NewEncoder(w).Encode(data)
-	if len(jokes) <= 1 {
-		updateJokes(10, geddit.NewSubmissions)
-	}
+
 }
 
 func topUpJokes(w http.ResponseWriter, r *http.Request) {
@@ -113,8 +113,14 @@ func createCommand(w http.ResponseWriter, r *http.Request) {
 }
 
 func getCommand(w http.ResponseWriter, r *http.Request) {
+	var data command
+	if len(commands) > 0 {
+		data = <-commands
+	} else {
 
-	data := <-commands
+		data.Type = "null"
+		data.Direction = "null"
+	}
 	json.NewEncoder(w).Encode(data)
 	fmt.Println("command sent to robot")
 }
