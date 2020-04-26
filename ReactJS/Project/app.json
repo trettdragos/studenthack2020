@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Project",
-    "slug": "Project",
+    "name": "Depresso",
+    "slug": "depresso",
     "platforms": [
       "ios",
       "android",
@@ -23,6 +23,12 @@
     ],
     "ios": {
       "supportsTablet": true
-    }
+    },
+    "android": {
+      "package": "com.yourcompany.yourappname",
+      "versionCode": 1
+    },
+    "description": "",
+    "githubUrl": "https://github.com/trettdragos/studenthack2020"
   }
 }
