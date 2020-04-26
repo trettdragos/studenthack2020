@@ -20,9 +20,9 @@ var commands chan command
 var counter safeInt
 
 const (
-	boredom     = 200
+	boredom     = 20
 	maxStrange  = 2
-	maxCommands = 100
+	maxCommands = 500
 	maxJokes    = 500
 )
 
