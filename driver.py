@@ -12,8 +12,8 @@ def say_joke():
 	r = requests.get(url=URL_JOKE)
 	data = r.json()
 	print(data)
-	os.system('espeak -w audio.wav -ven-us+f4 -s150 "'+data['Title']+ ' ' + data['Description'] +'"')
-	os.system('omxplayer -o local --vol -1500 audio.wav')
+	os.system('espeak -w audio.wav -ven-us+f4 -s170 "'+data['Title']+ ' ' + data['Description'] +'"')
+	os.system('owxplayer -o local --vol -1500 audio.wav')
 #	os.system('espeak -ven-us+f4 -s170 "'+data['Title']+'"')
 #	os.system('espeak -ven-us+f4 -s170 "'+data['Description']+'"')
 
@@ -25,18 +25,12 @@ def relay_command(command):
 while(1):
 	# relay_command("w")
 	r = requests.get(url=URL_COMM)
-	print(r)
 	data = r.json()
-	if(data['Type'] == "null"):
+	print(data)
+	if(data == None):
 		print("no response")
-		continue
 	else:
-		print(data)
 		if(data['Type'] == "joke"):
 			say_joke();
-		elif(data['Type'] == "move"):
+		if(data['Type'] == "move"):
 			relay_command(data['Direction'])
-		elif(data['Type'] == "strange"):
-			os.system('espeak -w audio.wav -ven-us+f4 -s150 "'+data['Direction']+'"')
-			os.system('omxplayer -o local --vol -1500 audio.wav')
-
