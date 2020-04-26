@@ -12,14 +12,15 @@ def say_joke():
 	r = requests.get(url=URL_JOKE)
 	data = r.json()
 	print(data)
-	os.system('espeak -ven-us+f4 -s170 "'+data['Title']+'"')
-	os.system('espeak -ven-us+f4 -s170 "'+data['Description']+'"')
+	os.system('espeak -w audio.wav -ven-us+f4 -s170 "'+data['Title']+ ' ' + data['Description'] +'"')
+	os.system('owxplayer -o local --vol -1500 audio.wav')
+#	os.system('espeak -ven-us+f4 -s170 "'+data['Title']+'"')
+#	os.system('espeak -ven-us+f4 -s170 "'+data['Description']+'"')
 
 def relay_command(command):
 	print("send command")
 	ard.write(command.encode())
 	# time.sleep(1)
-
 
 while(1):
 	# relay_command("w")
