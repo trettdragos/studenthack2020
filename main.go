@@ -20,7 +20,8 @@ var commands chan command
 var counter safeInt
 
 const (
-	boredom     = 15
+	boredom     = 200
+	maxStrange  = 2
 	maxCommands = 100
 	maxJokes    = 500
 )
@@ -124,7 +125,7 @@ func BoredomTimer() {
 	if counter.value <= 0 {
 		fmt.Println("I got bored so i thought of something")
 		counter.value = boredom
-		if len(commands) < maxCommands {
+		if len(commands) < maxStrange {
 			thought := getAStrangeThought()
 			var borredCommand command
 			borredCommand.Type = "strange"
