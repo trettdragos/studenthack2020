@@ -122,6 +122,7 @@ func getCommand(w http.ResponseWriter, r *http.Request) {
 func BoredomTimer() {
 	counter.mux.Lock()
 	counter.value--
+	fmt.Println("bored count", counter.value)
 	if counter.value <= 0 {
 		fmt.Println("I got bored so i thought of something")
 		counter.value = boredom
