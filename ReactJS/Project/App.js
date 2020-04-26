@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import {AntDesign, FontAwesome5} from '@expo/vector-icons';
+import {AntDesign, FontAwesome5, FontAwesome} from '@expo/vector-icons';
 
 const ApiServer = "http://138.197.73.249:80/app/putcommand"
 
@@ -73,6 +73,20 @@ export default class App extends Component{
             <AntDesign name="caretdown" size={32} color="#DCBE24" />
           </TouchableOpacity>
         </View>
+        <View style={styles.specialContainer}>
+          <View style={styles.grabContainer}>
+            <TouchableOpacity style={styles.midButton} onPress={() => sendDirection("g")}>
+              <FontAwesome name="hand-grab-o" size={32} color="#DCBE24" />
+              <Text style={{color:"#DCBE24", fontWeight:"bold"}}>GRAB</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.releaseContainer}>
+            <TouchableOpacity style={styles.midButton} onPress={() => sendDirection("r")}>
+              <FontAwesome name="hand-paper-o" size={32} color="#DCBE24" />
+              <Text style={{color:"#DCBE24", fontWeight:"bold"}}>RELEASE</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
     );
   }
@@ -86,27 +100,38 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   upContainer: {
-    flex: 3,
-    backgroundColor: '#C689C4',
+    flex: 2,
     alignItems: 'center',
     justifyContent: 'flex-end',
   },
   downContainer: {
-    flex: 3,
-    backgroundColor: '#C689C4',
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-start',
   },
   centerContainer: {
     flex: 1,
-    backgroundColor: '#C689C4',
     alignItems: 'center',
     justifyContent: 'space-around',
     flexDirection: 'row',
   },
+  specialContainer: {
+    flex: 2,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    flexDirection: 'row',
+    paddingBottom: 10
+  },
+  grabContainer: {
+    flex: 1,
+    alignItems: 'center'
+  },
+  releaseContainer: {
+    flex: 1,
+    alignItems: 'center'
+  },
   middleZone: {
     flex: 1,
-    backgroundColor: "#C689C4",
     alignItems: "center",
     justifyContent: "center",
   },
