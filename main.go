@@ -128,7 +128,7 @@ func BoredomTimer() {
 			thought := getAStrangeThought()
 			var borredCommand command
 			borredCommand.Type = "strange"
-			borredCommand.Direction = thought.Selftext
+			borredCommand.Direction = thought.Title
 			commands <- borredCommand
 		} else {
 			fmt.Println("But I didn't put it in")
